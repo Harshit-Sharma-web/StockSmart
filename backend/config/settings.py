@@ -25,6 +25,7 @@ DEBUG = flag("DJANGO_DEBUG")
 ALLOWED_HOSTS = values("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]")
 CORS_ALLOWED_ORIGINS = values("CORS_ALLOWED_ORIGINS")
 SECURE_SSL_REDIRECT = flag("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "0"))
@@ -40,8 +41,8 @@ INSTALLED_APPS = [
 ]
 AUTH_USER_MODEL = "accounts.User"
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
