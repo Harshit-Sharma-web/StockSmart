@@ -43,6 +43,7 @@ AUTH_USER_MODEL = "accounts.User"
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -61,6 +62,22 @@ TEMPLATES = [{
     ]},
 }]
 WSGI_APPLICATION = "config.wsgi.application"
+
+_db_options = {
+    "charset": "utf8mb4",
+    "init_command": "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB",
+}
+
+# Enable SSL only when configured
+if flag("MYSQL_USE_SSL"):
+    _db_options["ssl"] = {
+        "ca": os.getenv(
+            "MYSQL_SSL_CA",
+            "/etc/ssl/certs/ca-certificates.crt"
+        )
+    }
+
+
 DATABASES = {"default": {
     "ENGINE": "django.db.backends.mysql",
     "NAME": os.getenv("MYSQL_DATABASE", ""),
@@ -68,10 +85,11 @@ DATABASES = {"default": {
     "PASSWORD": os.getenv("MYSQL_PASSWORD", ""),
     "HOST": os.getenv("MYSQL_HOST", "127.0.0.1"),
     "PORT": os.getenv("MYSQL_PORT", "3306"),
-    "OPTIONS": {
-        "charset": "utf8mb4",
-        "init_command": "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB",
-    },
+    "OPTIONS": _db_options,
+    # "OPTIONS": {
+    #     "charset": "utf8mb4",
+    #     "init_command": "SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB",
+    # },
 }}
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"django.contrib.auth.password_validation.{name}"}
