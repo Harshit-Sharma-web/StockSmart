@@ -35,6 +35,10 @@ const publicPaths = new Set(['auth/login/', 'auth/register/', 'auth/refresh/']);
 
 api.interceptors.request.use((config: SessionRequest) => {
   config.sessionVersion = version;
+  // Give the hosted API time to wake up before submitting credentials.
+  if (import.meta.env.PROD && (config.url === 'auth/login/' || config.url === 'auth/register/')) {
+    config.timeout = 90000;
+  }
   if (tokens && !publicPaths.has(config.url || '')) config.headers.set('Authorization', 'Bearer ' + tokens.access);
   return config;
 });
