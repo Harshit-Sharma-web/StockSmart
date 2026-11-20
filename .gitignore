@@ -8,3 +8,24 @@ __pycache__/
 db.sqlite3
 media/
 staticfiles/
+
+
+# React / Vite
+node_modules/
+dist/
+build/
+coverage/
+
+# Python
+.pytest_cache/
+*.pyo
+
+# Local database files and backups
+*.sqlite3
+*.sql
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

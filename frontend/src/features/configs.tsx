@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { detail, list, write } from '../api/services';
-import type { DataRow, ProductImage } from '../api/types';
+import type { DataRow, Location, Order, OrderLine, Product, ProductImage } from '../api/types';
 import { Confirm, Form, lookup, number, options, select, type Field } from '../components/forms';
 import { Rows, useMetadata, type Column, type ResourceConfig } from '../components/resource';
 import { Badge, Empty, Issue, Loading, Modal, Pager, ProductPhoto } from '../components/ui';
@@ -26,20 +26,20 @@ const status = (key = 'status', label = 'Status'): Column => ({ key, label, stat
 
 // Helper hook to map location IDs to names
 const useLocationMap = () => {
-  const { data } = useQuery({ queryKey: ['locations', 'map'], queryFn: () => list('locations', { active: true }) });
+  const { data } = useQuery({ queryKey: ['locations', 'map'], queryFn: () => list<Location>('locations', { active: true }) });
   return useMemo(() => {
     const map: Record<number, string> = {};
-    data?.results?.forEach((loc: any) => { map[loc.id] = loc.name; });
+    data?.results?.forEach((loc) => { map[loc.id] = loc.name; });
     return map;
   }, [data]);
 };
 
 // Helper hook to map product IDs to names
 const useProductMap = () => {
-  const { data } = useQuery({ queryKey: ['products', 'map'], queryFn: () => list('products', { active: true }) });
+  const { data } = useQuery({ queryKey: ['products', 'map'], queryFn: () => list<Product>('products', { active: true }) });
   return useMemo(() => {
     const map: Record<number, string> = {};
-    data?.results?.forEach((prod: any) => { map[prod.id] = prod.name; });
+    data?.results?.forEach((prod) => { map[prod.id] = prod.name; });
     return map;
   }, [data]);
 };
@@ -47,24 +47,24 @@ const useProductMap = () => {
 // Cell component for location name
 const LocationCell = (row: DataRow) => {
   const map = useLocationMap();
-  const locId = (row as any).location as number;
+  const locId = Number(row.location);
   return <>{map[locId] ?? locId}</>;
 };
 
 // Cell component for product summary
 const ProductsCell = (row: DataRow) => {
-  const orderId = (row as any).id as number | undefined;
+  const orderId = typeof row.id === 'number' ? row.id : undefined;
   if (!orderId) return null;
   const { data: order } = useQuery({
     queryKey: ['order-detail', orderId],
-    queryFn: () => detail('orders', orderId),
+    queryFn: () => detail<Order>('orders', orderId),
     enabled: !!orderId,
   });
   const prodMap = useProductMap();
-  const items = (order?.items ?? []) as any[];
+  const items: OrderLine[] = order?.items ?? [];
   const firstTwo = items.slice(0, 2);
   const displayed = firstTwo
-    .map((it: any) => `${it.quantity} × ${prodMap[it.product] ?? 'Product ' + it.product}`)
+    .map((it) => `${it.quantity} × ${prodMap[it.product] ?? 'Product ' + it.product}`)
     .join(', ');
   const more = items.length - firstTwo.length;
   return <>{displayed}{more > 0 && ` +${more} more`}</>;
