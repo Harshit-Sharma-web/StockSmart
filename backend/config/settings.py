@@ -133,3 +133,9 @@ TIME_ZONE = "UTC"
 USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Use TiDB-compatible SimpleJWT migrations only when enabled
+if flag("USE_TIDB_TOKEN_MIGRATIONS"):
+    MIGRATION_MODULES = {
+        "token_blacklist": "config.tidb_token_migrations",
+    }
